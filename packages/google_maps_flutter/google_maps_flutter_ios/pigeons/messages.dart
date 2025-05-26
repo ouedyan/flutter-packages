@@ -138,6 +138,14 @@ class PlatformHeatmap {
   final Object json;
 }
 
+/// Pair of int values, such as for a color.
+class PlatformIntPair {
+  PlatformIntPair(this.x, this.y);
+
+  final int x;
+  final int y;
+}
+
 /// Pigeon equivalent of the InfoWindow class.
 class PlatformInfoWindow {
   PlatformInfoWindow({
@@ -254,6 +262,8 @@ class PlatformPolyline {
     required this.visible,
     required this.width,
     required this.zIndex,
+    this.gradient,
+    this.texture,
   });
 
   final String polylineId;
@@ -271,6 +281,13 @@ class PlatformPolyline {
   final bool visible;
   final int width;
   final int zIndex;
+
+  /// The gradient colors for the polyline.
+  /// Each int represents a color in ARGB format.
+  final PlatformIntPair? gradient;
+
+  /// The texture image data for the polyline.
+  final PlatformBitmap? texture;
 }
 
 /// Enumeration of possible types for PatternItem.

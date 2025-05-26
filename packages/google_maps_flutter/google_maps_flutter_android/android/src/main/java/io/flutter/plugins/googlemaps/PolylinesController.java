@@ -22,14 +22,16 @@ class PolylinesController {
   private GoogleMap googleMap;
   private final float density;
   private final AssetManager assetManager;
+  private final Convert.BitmapDescriptorFactoryWrapper bitmapDescriptorFactoryWrapper;
 
   PolylinesController(
-      @NonNull MapsCallbackApi flutterApi, AssetManager assetManager, float density) {
+      @NonNull MapsCallbackApi flutterApi, AssetManager assetManager, float density, Convert.BitmapDescriptorFactoryWrapper bitmapDescriptorFactoryWrapper) {
     this.assetManager = assetManager;
     this.polylineIdToController = new HashMap<>();
     this.googleMapsPolylineIdToDartPolylineId = new HashMap<>();
     this.flutterApi = flutterApi;
     this.density = density;
+    this.bitmapDescriptorFactoryWrapper = bitmapDescriptorFactoryWrapper;
   }
 
   void setGoogleMap(GoogleMap googleMap) {
@@ -74,7 +76,7 @@ class PolylinesController {
   private void addPolyline(@NonNull Messages.PlatformPolyline polyline) {
     PolylineBuilder polylineBuilder = new PolylineBuilder(density);
     String polylineId =
-        Convert.interpretPolylineOptions(polyline, polylineBuilder, assetManager, density);
+        Convert.interpretPolylineOptions(polyline, polylineBuilder, assetManager, density, bitmapDescriptorFactoryWrapper);
     PolylineOptions options = polylineBuilder.build();
     addPolyline(polylineId, options, polylineBuilder.consumeTapEvents());
   }
@@ -91,7 +93,7 @@ class PolylinesController {
     String polylineId = polyline.getPolylineId();
     PolylineController polylineController = polylineIdToController.get(polylineId);
     if (polylineController != null) {
-      Convert.interpretPolylineOptions(polyline, polylineController, assetManager, density);
+      Convert.interpretPolylineOptions(polyline, polylineController, assetManager, density, bitmapDescriptorFactoryWrapper);
     }
   }
 

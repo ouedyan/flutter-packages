@@ -19,6 +19,16 @@
 /// @param styles The styles for repeating pattern sections.
 /// @param lengths The lengths for repeating pattern sections.
 - (void)setPattern:(NSArray<GMSStrokeStyle *> *)styles lengths:(NSArray<NSNumber *> *)lengths;
+
+/// Sets the gradient on polyline controller
+///
+/// @param colors The colors for gradient.
+- (void)setGradient:(NSArray<UIColor *> *)colors;
+
+/// Sets the texture image on polyline controller
+///
+/// @param image The image to use for texture.
+- (void)setTexture:(UIImage *)image;
 @end
 
 @interface FLTPolylinesController : NSObject

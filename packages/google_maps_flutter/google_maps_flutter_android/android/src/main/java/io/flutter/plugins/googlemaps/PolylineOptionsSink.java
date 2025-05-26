@@ -4,6 +4,7 @@
 
 package io.flutter.plugins.googlemaps;
 
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.Cap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PatternItem;
@@ -33,4 +34,8 @@ interface PolylineOptionsSink {
   void setWidth(float width);
 
   void setZIndex(float zIndex);
+
+  void setGradient(int fromColor, int toColor);
+
+  void setTexture(BitmapDescriptor bitmapDescriptor);
 }

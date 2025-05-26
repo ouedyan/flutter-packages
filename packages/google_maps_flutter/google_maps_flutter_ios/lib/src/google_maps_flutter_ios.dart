@@ -632,6 +632,10 @@ class GoogleMapsFlutterIOS extends GoogleMapsFlutterPlatform {
         x: coordinate.x.toDouble(), y: coordinate.y.toDouble());
   }
 
+  static PlatformIntPair _platformPairFromColorList(List<Color> colors) {
+    return PlatformIntPair(x: colors.first.value, y: colors.last.value);
+  }
+
   static PlatformPoint _platformPointFromOffset(Offset offset) {
     return PlatformPoint(x: offset.dx, y: offset.dy);
   }
@@ -732,17 +736,22 @@ class GoogleMapsFlutterIOS extends GoogleMapsFlutterPlatform {
     final List<PlatformPatternItem> pattern =
         polyline.patterns.map(platformPatternItemFromPatternItem).toList();
     return PlatformPolyline(
-      polylineId: polyline.polylineId.value,
-      consumesTapEvents: polyline.consumeTapEvents,
-      color: polyline.color.value,
-      geodesic: polyline.geodesic,
-      visible: polyline.visible,
-      width: polyline.width,
-      zIndex: polyline.zIndex,
-      points: points,
-      jointType: platformJointTypeFromJointType(polyline.jointType),
-      patterns: pattern,
-    );
+        polylineId: polyline.polylineId.value,
+        consumesTapEvents: polyline.consumeTapEvents,
+        color: polyline.color.value,
+        geodesic: polyline.geodesic,
+        visible: polyline.visible,
+        width: polyline.width,
+        zIndex: polyline.zIndex,
+        points: points,
+        jointType: platformJointTypeFromJointType(polyline.jointType),
+        patterns: pattern,
+        gradient: polyline.gradient != null && polyline.gradient!.length == 2
+            ? _platformPairFromColorList(polyline.gradient!)
+            : null,
+        texture: polyline.texture != null
+            ? platformBitmapFromBitmapDescriptor(polyline.texture!)
+            : null);
   }
 
   static PlatformTileOverlay _platformTileOverlayFromTileOverlay(

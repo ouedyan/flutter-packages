@@ -137,7 +137,7 @@ class GoogleMapController
             density,
             new Convert.BitmapDescriptorFactoryWrapper());
     this.polygonsController = new PolygonsController(flutterApi, density);
-    this.polylinesController = new PolylinesController(flutterApi, assetManager, density);
+    this.polylinesController = new PolylinesController(flutterApi, assetManager, density, new Convert.BitmapDescriptorFactoryWrapper());
     this.circlesController = new CirclesController(flutterApi, density);
     this.heatmapsController = new HeatmapsController();
     this.tileOverlaysController = new TileOverlaysController(flutterApi);

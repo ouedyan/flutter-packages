@@ -4,16 +4,32 @@
 
 package io.flutter.plugins.googlemaps;
 
+import android.util.Pair;
+
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.Cap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.StampStyle;
+import com.google.android.gms.maps.model.StrokeStyle;
+import com.google.android.gms.maps.model.StyleSpan;
+import com.google.android.gms.maps.model.TextureStyle;
+
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 
 class PolylineBuilder implements PolylineOptionsSink {
   private final PolylineOptions polylineOptions;
   private boolean consumeTapEvents;
   private final float density;
+
+  @Nullable
+  private Pair<Integer, Integer> gradient;
+
+  @Nullable
+  private BitmapDescriptor texture;
 
   PolylineBuilder(float density) {
     this.polylineOptions = new PolylineOptions();
@@ -83,4 +99,35 @@ class PolylineBuilder implements PolylineOptionsSink {
   public void setZIndex(float zIndex) {
     polylineOptions.zIndex(zIndex);
   }
+
+  @Override
+  public void setGradient(int fromColor, int toColor) {
+    var strokeBuilder = StrokeStyle
+            .gradientBuilder(fromColor, toColor);
+    if(this.texture != null){
+      StampStyle stampStyle = TextureStyle.newBuilder(this.texture).build();
+      strokeBuilder.stamp(stampStyle);
+    }
+    polylineOptions.addSpan(
+            new StyleSpan(
+                    strokeBuilder.build()
+            ));
+    this.gradient = new Pair(fromColor, toColor);
+  }
+
+  @Override
+  public void setTexture(BitmapDescriptor bitmapDescriptor) {
+    StampStyle stampStyle = TextureStyle.newBuilder(bitmapDescriptor).build();
+    var strokeBuilder = this.gradient != null ?
+            StrokeStyle.gradientBuilder(this.gradient.first, this.gradient.second) :
+            StrokeStyle.colorBuilder(polylineOptions.getColor());
+    polylineOptions.addSpan(
+              new StyleSpan(
+                      strokeBuilder
+                              .stamp(stampStyle)
+                              .build()
+              ));
+    this.texture = bitmapDescriptor;
+    }
+
 }

@@ -730,6 +730,10 @@ class GoogleMapsFlutterAndroid extends GoogleMapsFlutterPlatform {
         latitude: latLng.latitude, longitude: latLng.longitude);
   }
 
+  static PlatformIntPair _platformPairFromColorList(List<Color> colors) {
+    return PlatformIntPair(x: colors.first.value, y: colors.last.value);
+  }
+
   static PlatformDoublePair _platformPairFromOffset(Offset offset) {
     return PlatformDoublePair(x: offset.dx, y: offset.dy);
   }
@@ -847,19 +851,24 @@ class GoogleMapsFlutterAndroid extends GoogleMapsFlutterPlatform {
     final List<PlatformPatternItem> pattern =
         polyline.patterns.map(platformPatternItemFromPatternItem).toList();
     return PlatformPolyline(
-      polylineId: polyline.polylineId.value,
-      consumesTapEvents: polyline.consumeTapEvents,
-      color: polyline.color.value,
-      startCap: platformCapFromCap(polyline.startCap),
-      endCap: platformCapFromCap(polyline.endCap),
-      geodesic: polyline.geodesic,
-      visible: polyline.visible,
-      width: polyline.width,
-      zIndex: polyline.zIndex,
-      points: points,
-      jointType: platformJointTypeFromJointType(polyline.jointType),
-      patterns: pattern,
-    );
+        polylineId: polyline.polylineId.value,
+        consumesTapEvents: polyline.consumeTapEvents,
+        color: polyline.color.value,
+        startCap: platformCapFromCap(polyline.startCap),
+        endCap: platformCapFromCap(polyline.endCap),
+        geodesic: polyline.geodesic,
+        visible: polyline.visible,
+        width: polyline.width,
+        zIndex: polyline.zIndex,
+        points: points,
+        jointType: platformJointTypeFromJointType(polyline.jointType),
+        patterns: pattern,
+        gradient: polyline.gradient != null && polyline.gradient!.length == 2
+            ? _platformPairFromColorList(polyline.gradient!)
+            : null,
+        texture: polyline.texture != null
+            ? platformBitmapFromBitmapDescriptor(polyline.texture!)
+            : null);
   }
 
   static PlatformTileOverlay _platformTileOverlayFromTileOverlay(

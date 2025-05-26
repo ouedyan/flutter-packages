@@ -644,7 +644,8 @@ class Convert {
       Messages.PlatformPolyline polyline,
       PolylineOptionsSink sink,
       AssetManager assetManager,
-      float density) {
+      float density,
+      BitmapDescriptorFactoryWrapper wrapper) {
     sink.setConsumeTapEvents(polyline.getConsumesTapEvents());
     sink.setColor(polyline.getColor().intValue());
     sink.setEndCap(capFromPigeon(polyline.getEndCap(), assetManager, density));
@@ -656,6 +657,14 @@ class Convert {
     sink.setZIndex(polyline.getZIndex());
     sink.setPoints(pointsFromPigeon(polyline.getPoints()));
     sink.setPattern(patternFromPigeon(polyline.getPatterns()));
+
+    if (polyline.getGradient() != null) {
+      sink.setGradient(polyline.getGradient().getX().intValue(), polyline.getGradient().getY().intValue());
+    }
+    if (polyline.getTexture() != null) {
+      sink.setTexture(toBitmapDescriptor(polyline.getTexture(), assetManager, density, wrapper));
+    }
+
     return polyline.getPolylineId();
   }
 
