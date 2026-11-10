@@ -1,3 +1,11 @@
+## 2.20.0
+
+* Adds `Polyline.gradient` and `Polyline.texture` for drawing a polyline with a
+  two-color gradient or a repeated image.
+  On iOS, this requires `google_maps_flutter_ios_sdk9` or
+  `google_maps_flutter_ios_sdk10` (the default `google_maps_flutter_ios`
+  package does not receive new features).
+
 ## 2.19.0
 
 * Adds support for tapping points of interest on the map.

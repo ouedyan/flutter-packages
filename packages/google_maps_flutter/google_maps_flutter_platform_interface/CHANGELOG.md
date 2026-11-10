@@ -1,3 +1,8 @@
+## 2.19.0
+
+* Adds `Polyline.gradient` and `Polyline.texture` for drawing a polyline with a
+  two-color gradient or a repeated image.
+
 ## 2.18.0
 
 * Adds support for configuring the color displayed behind unloaded map tiles.

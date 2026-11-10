@@ -11,6 +11,7 @@ import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.GroundOverlay
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.StrokeStyle
 import com.google.maps.android.clustering.algo.StaticCluster
 import com.google.maps.android.geometry.Point
 import com.google.maps.android.heatmaps.Gradient
@@ -198,6 +199,115 @@ class ConvertTest {
 
     assertEquals(mockBitmapDescriptor, result)
     verify(bitmapDescriptorFactoryWrapper, never()).fromBitmap(any())
+  }
+
+  private fun platformPolyline(
+      gradient: PlatformPolylineGradient? = null,
+      texture: PlatformBitmap? = null
+  ): PlatformPolyline =
+      PlatformPolyline(
+          polylineId = "polyline",
+          consumesTapEvents = false,
+          color = PlatformColor(0xFF00FF00),
+          geodesic = false,
+          jointType = PlatformJointType.MITERED,
+          patterns = listOf(),
+          points = listOf(PlatformLatLng(0.0, 0.0), PlatformLatLng(1.0, 1.0)),
+          startCap = PlatformCap(PlatformCapType.BUTT_CAP),
+          endCap = PlatformCap(PlatformCapType.BUTT_CAP),
+          visible = true,
+          width = 4,
+          zIndex = 0,
+          gradient = gradient,
+          texture = texture)
+
+  private fun textureBitmap(): PlatformBitmap =
+      PlatformBitmap(
+          PlatformBitmapBytesMap(
+              Base64.decode(base64Image, Base64.DEFAULT),
+              PlatformMapBitmapScaling.NONE,
+              imagePixelRatio = 1.0))
+
+  @Test
+  fun polylineSpansFromPigeon_isEmptyWithoutGradientOrTexture() {
+    val spans =
+        Convert.polylineSpansFromPigeon(
+            platformPolyline(), assetManager, 1f, bitmapDescriptorFactoryWrapper)
+
+    assertEquals(0, spans.size)
+    verifyNoInteractions(bitmapDescriptorFactoryWrapper)
+  }
+
+  @Test
+  fun polylineSpansFromPigeon_gradientUsesGradientStrokeStyle() {
+    Mockito.mockStatic(StrokeStyle::class.java, Mockito.CALLS_REAL_METHODS).use { strokeStyle ->
+      val spans =
+          Convert.polylineSpansFromPigeon(
+              platformPolyline(
+                  gradient =
+                      PlatformPolylineGradient(
+                          PlatformColor(0xFF1B2A4A), PlatformColor(0xFFF5A524))),
+              assetManager,
+              1f,
+              bitmapDescriptorFactoryWrapper)
+
+      strokeStyle.verify { StrokeStyle.gradientBuilder(0xFF1B2A4A.toInt(), 0xFFF5A524.toInt()) }
+      strokeStyle.verify({ StrokeStyle.colorBuilder(any()) }, never())
+      assertEquals(1, spans.size)
+      assertNull(spans[0].style.stamp)
+    }
+  }
+
+  @Test
+  fun polylineSpansFromPigeon_textureStampsLineColor() {
+    whenever(bitmapDescriptorFactoryWrapper.fromBitmap(any())).thenReturn(mockBitmapDescriptor)
+
+    Mockito.mockStatic(StrokeStyle::class.java, Mockito.CALLS_REAL_METHODS).use { strokeStyle ->
+      val spans =
+          Convert.polylineSpansFromPigeon(
+              platformPolyline(texture = textureBitmap()),
+              assetManager,
+              1f,
+              bitmapDescriptorFactoryWrapper)
+
+      strokeStyle.verify { StrokeStyle.colorBuilder(0xFF00FF00.toInt()) }
+      assertEquals(1, spans.size)
+      assertEquals(mockBitmapDescriptor, spans[0].style.stamp?.stamp)
+    }
+  }
+
+  @Test
+  fun polylineSpansFromPigeon_gradientAndTextureCombine() {
+    whenever(bitmapDescriptorFactoryWrapper.fromBitmap(any())).thenReturn(mockBitmapDescriptor)
+
+    Mockito.mockStatic(StrokeStyle::class.java, Mockito.CALLS_REAL_METHODS).use { strokeStyle ->
+      val spans =
+          Convert.polylineSpansFromPigeon(
+              platformPolyline(
+                  gradient =
+                      PlatformPolylineGradient(
+                          PlatformColor(0xFF1B2A4A), PlatformColor(0xFFF5A524)),
+                  texture = textureBitmap()),
+              assetManager,
+              1f,
+              bitmapDescriptorFactoryWrapper)
+
+      strokeStyle.verify { StrokeStyle.gradientBuilder(0xFF1B2A4A.toInt(), 0xFFF5A524.toInt()) }
+      strokeStyle.verify({ StrokeStyle.colorBuilder(any()) }, never())
+      assertEquals(1, spans.size)
+      assertEquals(mockBitmapDescriptor, spans[0].style.stamp?.stamp)
+    }
+  }
+
+  @Test
+  fun interpretPolylineOptions_alwaysSetsSpans() {
+    val sink: PolylineOptionsSink = mock()
+
+    Convert.interpretPolylineOptions(
+        platformPolyline(), sink, assetManager, 1f, bitmapDescriptorFactoryWrapper)
+
+    // An empty list clears any gradient or texture from a previous update.
+    verify(sink).setSpans(listOf())
   }
 
   @Test

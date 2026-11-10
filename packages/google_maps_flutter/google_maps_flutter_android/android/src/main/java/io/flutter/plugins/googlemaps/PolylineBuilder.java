@@ -9,6 +9,7 @@ import com.google.android.gms.maps.model.Cap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.StyleSpan;
 import java.util.List;
 
 class PolylineBuilder implements PolylineOptionsSink {
@@ -83,5 +84,10 @@ class PolylineBuilder implements PolylineOptionsSink {
   @Override
   public void setZIndex(float zIndex) {
     polylineOptions.zIndex(zIndex);
+  }
+
+  @Override
+  public void setSpans(@NonNull List<StyleSpan> spans) {
+    polylineOptions.addAllSpans(spans);
   }
 }

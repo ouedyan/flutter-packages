@@ -288,6 +288,8 @@ class PlatformPolyline {
     required this.visible,
     required this.width,
     required this.zIndex,
+    this.gradient,
+    this.texture,
   });
 
   final String polylineId;
@@ -310,6 +312,21 @@ class PlatformPolyline {
   final bool visible;
   final int width;
   final int zIndex;
+
+  /// The gradient drawn along the whole line instead of [color], if any.
+  final PlatformPolylineGradient? gradient;
+
+  /// The image repeated along the line, if any.
+  final PlatformBitmap? texture;
+}
+
+/// Pigeon equivalent of a two-color polyline gradient, from the first point
+/// of the line to its last.
+class PlatformPolylineGradient {
+  PlatformPolylineGradient({required this.startColor, required this.endColor});
+
+  final PlatformColor startColor;
+  final PlatformColor endColor;
 }
 
 /// Enumeration of possible types of PlatformCap, corresponding to the

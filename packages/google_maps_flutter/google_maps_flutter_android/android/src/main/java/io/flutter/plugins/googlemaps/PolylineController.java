@@ -4,10 +4,12 @@
 
 package io.flutter.plugins.googlemaps;
 
+import androidx.annotation.NonNull;
 import com.google.android.gms.maps.model.Cap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.StyleSpan;
 import java.util.List;
 
 /** Controller of a single Polyline on the map. */
@@ -82,6 +84,11 @@ class PolylineController implements PolylineOptionsSink {
   @Override
   public void setZIndex(float zIndex) {
     polyline.setZIndex(zIndex);
+  }
+
+  @Override
+  public void setSpans(@NonNull List<StyleSpan> spans) {
+    polyline.setSpans(spans);
   }
 
   String getGoogleMapsPolylineId() {

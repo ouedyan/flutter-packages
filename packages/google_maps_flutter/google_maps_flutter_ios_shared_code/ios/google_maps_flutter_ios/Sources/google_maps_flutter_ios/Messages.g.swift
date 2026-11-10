@@ -1235,6 +1235,10 @@ struct PlatformPolyline: Hashable, CustomStringConvertible {
   var visible: Bool
   var width: Int64
   var zIndex: Int64
+  /// The gradient drawn along the whole line instead of [color], if any.
+  var gradient: PlatformPolylineGradient? = nil
+  /// The image repeated along the line, if any.
+  var texture: PlatformBitmap? = nil
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
   static func fromList(_ pigeonVar_list: [Any?]) -> PlatformPolyline? {
@@ -1248,6 +1252,8 @@ struct PlatformPolyline: Hashable, CustomStringConvertible {
     let visible = pigeonVar_list[7] as! Bool
     let width = pigeonVar_list[8] as! Int64
     let zIndex = pigeonVar_list[9] as! Int64
+    let gradient: PlatformPolylineGradient? = nilOrValue(pigeonVar_list[10])
+    let texture: PlatformBitmap? = nilOrValue(pigeonVar_list[11])
 
     return PlatformPolyline(
       polylineId: polylineId,
@@ -1259,7 +1265,9 @@ struct PlatformPolyline: Hashable, CustomStringConvertible {
       points: points,
       visible: visible,
       width: width,
-      zIndex: zIndex
+      zIndex: zIndex,
+      gradient: gradient,
+      texture: texture
     )
   }
   func toList() -> [Any?] {
@@ -1274,6 +1282,8 @@ struct PlatformPolyline: Hashable, CustomStringConvertible {
       visible,
       width,
       zIndex,
+      gradient,
+      texture,
     ]
   }
   static func == (lhs: PlatformPolyline, rhs: PlatformPolyline) -> Bool {
@@ -1290,6 +1300,8 @@ struct PlatformPolyline: Hashable, CustomStringConvertible {
       && MessagesPigeonInternal.deepEquals(lhs.visible, rhs.visible)
       && MessagesPigeonInternal.deepEquals(lhs.width, rhs.width)
       && MessagesPigeonInternal.deepEquals(lhs.zIndex, rhs.zIndex)
+      && MessagesPigeonInternal.deepEquals(lhs.gradient, rhs.gradient)
+      && MessagesPigeonInternal.deepEquals(lhs.texture, rhs.texture)
   }
 
   func hash(into hasher: inout Hasher) {
@@ -1304,11 +1316,57 @@ struct PlatformPolyline: Hashable, CustomStringConvertible {
     MessagesPigeonInternal.deepHash(value: visible, hasher: &hasher)
     MessagesPigeonInternal.deepHash(value: width, hasher: &hasher)
     MessagesPigeonInternal.deepHash(value: zIndex, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: gradient, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: texture, hasher: &hasher)
   }
 
   public var description: String {
     return
-      "PlatformPolyline(polylineId: \(String(describing: polylineId)), consumesTapEvents: \(String(describing: consumesTapEvents)), color: \(String(describing: color)), geodesic: \(String(describing: geodesic)), jointType: \(String(describing: jointType)), patterns: \(String(describing: patterns)), points: \(String(describing: points)), visible: \(String(describing: visible)), width: \(String(describing: width)), zIndex: \(String(describing: zIndex)))"
+      "PlatformPolyline(polylineId: \(String(describing: polylineId)), consumesTapEvents: \(String(describing: consumesTapEvents)), color: \(String(describing: color)), geodesic: \(String(describing: geodesic)), jointType: \(String(describing: jointType)), patterns: \(String(describing: patterns)), points: \(String(describing: points)), visible: \(String(describing: visible)), width: \(String(describing: width)), zIndex: \(String(describing: zIndex)), gradient: \(String(describing: gradient)), texture: \(String(describing: texture)))"
+  }
+}
+
+/// Pigeon equivalent of a two-color polyline gradient, from the first point
+/// of the line to its last.
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct PlatformPolylineGradient: Hashable, CustomStringConvertible {
+  var startColor: PlatformColor
+  var endColor: PlatformColor
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> PlatformPolylineGradient? {
+    let startColor = pigeonVar_list[0] as! PlatformColor
+    let endColor = pigeonVar_list[1] as! PlatformColor
+
+    return PlatformPolylineGradient(
+      startColor: startColor,
+      endColor: endColor
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      startColor,
+      endColor,
+    ]
+  }
+  static func == (lhs: PlatformPolylineGradient, rhs: PlatformPolylineGradient) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.startColor, rhs.startColor)
+      && MessagesPigeonInternal.deepEquals(lhs.endColor, rhs.endColor)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("PlatformPolylineGradient")
+    MessagesPigeonInternal.deepHash(value: startColor, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: endColor, hasher: &hasher)
+  }
+
+  public var description: String {
+    return
+      "PlatformPolylineGradient(startColor: \(String(describing: startColor)), endColor: \(String(describing: endColor)))"
   }
 }
 
@@ -2660,48 +2718,50 @@ private class MessagesPigeonCodecReader: FlutterStandardReader {
     case 153:
       return PlatformPolyline.fromList(self.readValue() as! [Any?])
     case 154:
-      return PlatformPatternItem.fromList(self.readValue() as! [Any?])
+      return PlatformPolylineGradient.fromList(self.readValue() as! [Any?])
     case 155:
-      return PlatformTile.fromList(self.readValue() as! [Any?])
+      return PlatformPatternItem.fromList(self.readValue() as! [Any?])
     case 156:
-      return PlatformTileOverlay.fromList(self.readValue() as! [Any?])
+      return PlatformTile.fromList(self.readValue() as! [Any?])
     case 157:
-      return PlatformEdgeInsets.fromList(self.readValue() as! [Any?])
+      return PlatformTileOverlay.fromList(self.readValue() as! [Any?])
     case 158:
-      return PlatformLatLng.fromList(self.readValue() as! [Any?])
+      return PlatformEdgeInsets.fromList(self.readValue() as! [Any?])
     case 159:
-      return PlatformLatLngBounds.fromList(self.readValue() as! [Any?])
+      return PlatformLatLng.fromList(self.readValue() as! [Any?])
     case 160:
-      return PlatformCameraTargetBounds.fromList(self.readValue() as! [Any?])
+      return PlatformLatLngBounds.fromList(self.readValue() as! [Any?])
     case 161:
-      return PlatformGroundOverlay.fromList(self.readValue() as! [Any?])
+      return PlatformCameraTargetBounds.fromList(self.readValue() as! [Any?])
     case 162:
-      return PlatformMapViewCreationParams.fromList(self.readValue() as! [Any?])
+      return PlatformGroundOverlay.fromList(self.readValue() as! [Any?])
     case 163:
-      return PlatformMapConfiguration.fromList(self.readValue() as! [Any?])
+      return PlatformMapViewCreationParams.fromList(self.readValue() as! [Any?])
     case 164:
-      return PlatformPoint.fromList(self.readValue() as! [Any?])
+      return PlatformMapConfiguration.fromList(self.readValue() as! [Any?])
     case 165:
-      return PlatformSize.fromList(self.readValue() as! [Any?])
+      return PlatformPoint.fromList(self.readValue() as! [Any?])
     case 166:
-      return PlatformColor.fromList(self.readValue() as! [Any?])
+      return PlatformSize.fromList(self.readValue() as! [Any?])
     case 167:
-      return PlatformTileLayer.fromList(self.readValue() as! [Any?])
+      return PlatformColor.fromList(self.readValue() as! [Any?])
     case 168:
-      return PlatformZoomRange.fromList(self.readValue() as! [Any?])
+      return PlatformTileLayer.fromList(self.readValue() as! [Any?])
     case 169:
-      return PlatformBitmapDefaultMarker.fromList(self.readValue() as! [Any?])
+      return PlatformZoomRange.fromList(self.readValue() as! [Any?])
     case 170:
-      return PlatformBitmapBytes.fromList(self.readValue() as! [Any?])
+      return PlatformBitmapDefaultMarker.fromList(self.readValue() as! [Any?])
     case 171:
-      return PlatformBitmapAsset.fromList(self.readValue() as! [Any?])
+      return PlatformBitmapBytes.fromList(self.readValue() as! [Any?])
     case 172:
-      return PlatformBitmapAssetImage.fromList(self.readValue() as! [Any?])
+      return PlatformBitmapAsset.fromList(self.readValue() as! [Any?])
     case 173:
-      return PlatformBitmapAssetMap.fromList(self.readValue() as! [Any?])
+      return PlatformBitmapAssetImage.fromList(self.readValue() as! [Any?])
     case 174:
-      return PlatformBitmapBytesMap.fromList(self.readValue() as! [Any?])
+      return PlatformBitmapAssetMap.fromList(self.readValue() as! [Any?])
     case 175:
+      return PlatformBitmapBytesMap.fromList(self.readValue() as! [Any?])
+    case 176:
       return PlatformBitmapPinConfig.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
@@ -2786,71 +2846,74 @@ private class MessagesPigeonCodecWriter: FlutterStandardWriter {
     } else if let value = value as? PlatformPolyline {
       super.writeByte(153)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformPatternItem {
+    } else if let value = value as? PlatformPolylineGradient {
       super.writeByte(154)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformTile {
+    } else if let value = value as? PlatformPatternItem {
       super.writeByte(155)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformTileOverlay {
+    } else if let value = value as? PlatformTile {
       super.writeByte(156)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformEdgeInsets {
+    } else if let value = value as? PlatformTileOverlay {
       super.writeByte(157)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformLatLng {
+    } else if let value = value as? PlatformEdgeInsets {
       super.writeByte(158)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformLatLngBounds {
+    } else if let value = value as? PlatformLatLng {
       super.writeByte(159)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformCameraTargetBounds {
+    } else if let value = value as? PlatformLatLngBounds {
       super.writeByte(160)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformGroundOverlay {
+    } else if let value = value as? PlatformCameraTargetBounds {
       super.writeByte(161)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformMapViewCreationParams {
+    } else if let value = value as? PlatformGroundOverlay {
       super.writeByte(162)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformMapConfiguration {
+    } else if let value = value as? PlatformMapViewCreationParams {
       super.writeByte(163)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformPoint {
+    } else if let value = value as? PlatformMapConfiguration {
       super.writeByte(164)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformSize {
+    } else if let value = value as? PlatformPoint {
       super.writeByte(165)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformColor {
+    } else if let value = value as? PlatformSize {
       super.writeByte(166)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformTileLayer {
+    } else if let value = value as? PlatformColor {
       super.writeByte(167)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformZoomRange {
+    } else if let value = value as? PlatformTileLayer {
       super.writeByte(168)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformBitmapDefaultMarker {
+    } else if let value = value as? PlatformZoomRange {
       super.writeByte(169)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformBitmapBytes {
+    } else if let value = value as? PlatformBitmapDefaultMarker {
       super.writeByte(170)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformBitmapAsset {
+    } else if let value = value as? PlatformBitmapBytes {
       super.writeByte(171)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformBitmapAssetImage {
+    } else if let value = value as? PlatformBitmapAsset {
       super.writeByte(172)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformBitmapAssetMap {
+    } else if let value = value as? PlatformBitmapAssetImage {
       super.writeByte(173)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformBitmapBytesMap {
+    } else if let value = value as? PlatformBitmapAssetMap {
       super.writeByte(174)
       super.writeValue(value.toList())
-    } else if let value = value as? PlatformBitmapPinConfig {
+    } else if let value = value as? PlatformBitmapBytesMap {
       super.writeByte(175)
+      super.writeValue(value.toList())
+    } else if let value = value as? PlatformBitmapPinConfig {
+      super.writeByte(176)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)

@@ -1,3 +1,7 @@
+## 2.20.0
+
+* Adds support for `Polyline.gradient` and `Polyline.texture`.
+
 ## 2.19.0
 
 * Adds support for tapping points of interest on the map.

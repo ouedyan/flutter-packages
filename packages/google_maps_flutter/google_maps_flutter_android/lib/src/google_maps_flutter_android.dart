@@ -815,6 +815,25 @@ class GoogleMapsFlutterAndroid extends GoogleMapsFlutterPlatform {
       points: points,
       jointType: platformJointTypeFromJointType(polyline.jointType),
       patterns: pattern,
+      gradient: _platformPolylineGradientFromColors(polyline.gradient),
+      texture: switch (polyline.texture) {
+        final BitmapDescriptor texture => platformBitmapFromBitmapDescriptor(texture),
+        null => null,
+      },
+    );
+  }
+
+  static PlatformPolylineGradient? _platformPolylineGradientFromColors(List<Color>? colors) {
+    if (colors == null) {
+      return null;
+    }
+    assert(colors.length == 2, 'Polyline.gradient must contain exactly two colors.');
+    if (colors.length != 2) {
+      return null;
+    }
+    return PlatformPolylineGradient(
+      startColor: PlatformColor(argbValue: colors.first.toARGB32()),
+      endColor: PlatformColor(argbValue: colors.last.toARGB32()),
     );
   }
 

@@ -39,6 +39,9 @@ import com.google.android.gms.maps.model.PinConfig;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.maps.model.RuntimeRemoteException;
 import com.google.android.gms.maps.model.SquareCap;
+import com.google.android.gms.maps.model.StrokeStyle;
+import com.google.android.gms.maps.model.StyleSpan;
+import com.google.android.gms.maps.model.TextureStyle;
 import com.google.android.gms.maps.model.Tile;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.heatmaps.Gradient;
@@ -47,6 +50,7 @@ import io.flutter.FlutterInjector;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -653,7 +657,8 @@ class Convert {
       PlatformPolyline polyline,
       PolylineOptionsSink sink,
       AssetManager assetManager,
-      float density) {
+      float density,
+      @NonNull BitmapDescriptorFactoryWrapper wrapper) {
     sink.setConsumeTapEvents(polyline.getConsumesTapEvents());
     sink.setColor((int) polyline.getColor().getArgbValue());
     sink.setEndCap(capFromPigeon(polyline.getEndCap(), assetManager, density));
@@ -665,7 +670,39 @@ class Convert {
     sink.setZIndex(polyline.getZIndex());
     sink.setPoints(pointsFromPigeon(polyline.getPoints()));
     sink.setPattern(patternFromPigeon(polyline.getPatterns()));
+    sink.setSpans(polylineSpansFromPigeon(polyline, assetManager, density, wrapper));
     return polyline.getPolylineId();
+  }
+
+  /**
+   * Returns the style spans for a polyline's gradient and texture.
+   *
+   * <p>The result is empty when the polyline has neither, so that the line is drawn with its plain
+   * color, and otherwise holds a single span covering the whole line.
+   */
+  @VisibleForTesting
+  static @NonNull List<StyleSpan> polylineSpansFromPigeon(
+      @NonNull PlatformPolyline polyline,
+      @NonNull AssetManager assetManager,
+      float density,
+      @NonNull BitmapDescriptorFactoryWrapper wrapper) {
+    final PlatformPolylineGradient gradient = polyline.getGradient();
+    final PlatformBitmap texture = polyline.getTexture();
+    if (gradient == null && texture == null) {
+      return Collections.emptyList();
+    }
+    final StrokeStyle.Builder strokeStyle =
+        gradient != null
+            ? StrokeStyle.gradientBuilder(
+                (int) gradient.getStartColor().getArgbValue(),
+                (int) gradient.getEndColor().getArgbValue())
+            : StrokeStyle.colorBuilder((int) polyline.getColor().getArgbValue());
+    if (texture != null) {
+      strokeStyle.stamp(
+          TextureStyle.newBuilder(toBitmapDescriptor(texture, assetManager, density, wrapper))
+              .build());
+    }
+    return Collections.singletonList(new StyleSpan(strokeStyle.build()));
   }
 
   static String interpretCircleOptions(PlatformCircle circle, CircleOptionsSink sink) {

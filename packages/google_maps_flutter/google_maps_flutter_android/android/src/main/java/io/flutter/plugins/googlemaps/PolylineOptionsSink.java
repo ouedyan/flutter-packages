@@ -4,9 +4,11 @@
 
 package io.flutter.plugins.googlemaps;
 
+import androidx.annotation.NonNull;
 import com.google.android.gms.maps.model.Cap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PatternItem;
+import com.google.android.gms.maps.model.StyleSpan;
 import java.util.List;
 
 /** Receiver of Polyline configuration options. */
@@ -33,4 +35,7 @@ interface PolylineOptionsSink {
   void setWidth(float width);
 
   void setZIndex(float zIndex);
+
+  /** Sets the style spans drawn along the line; an empty list removes them. */
+  void setSpans(@NonNull List<StyleSpan> spans);
 }

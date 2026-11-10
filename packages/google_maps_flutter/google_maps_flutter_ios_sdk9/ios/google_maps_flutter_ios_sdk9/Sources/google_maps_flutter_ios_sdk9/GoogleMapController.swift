@@ -186,7 +186,8 @@ public class GoogleMapController: NSObject, GMSMapViewDelegate, FlutterPlatformV
     )
     polylinesController = PolylinesController(
       mapView: mapView,
-      eventDelegate: dartCallbackHandler
+      eventDelegate: dartCallbackHandler,
+      assetProvider: assetProvider
     )
     circlesController = CirclesController(
       mapView: mapView,

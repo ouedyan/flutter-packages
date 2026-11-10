@@ -4,6 +4,8 @@
 
 // ignore_for_file: public_member_api_docs
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
@@ -67,6 +69,12 @@ class PlacePolylineBodyState extends State<PlacePolylineBody> {
     <PatternItem>[PatternItem.dash(30.0), PatternItem.gap(20.0)],
     <PatternItem>[PatternItem.dot, PatternItem.gap(10.0)],
   ];
+
+  // Colors used when toggling the polyline gradient
+  static const List<Color> gradient = <Color>[Color(0xFF1B2A4A), Color(0xFFF5A524)];
+
+  // Image used when toggling the polyline texture, created on first use
+  BitmapDescriptor? texture;
 
   // ignore: use_setters_to_change_properties
   void _onMapCreated(ExampleGoogleMapController controller) {
@@ -184,6 +192,75 @@ class PlacePolylineBodyState extends State<PlacePolylineBody> {
     });
   }
 
+  /// Returns [polyline] with the given gradient and texture.
+  ///
+  /// [Polyline.copyWith] cannot clear a value, so this creates a new polyline.
+  Polyline _restyle(Polyline polyline, {List<Color>? gradient, BitmapDescriptor? texture}) {
+    return Polyline(
+      polylineId: polyline.polylineId,
+      consumeTapEvents: polyline.consumeTapEvents,
+      color: polyline.color,
+      endCap: polyline.endCap,
+      geodesic: polyline.geodesic,
+      jointType: polyline.jointType,
+      points: polyline.points,
+      patterns: polyline.patterns,
+      startCap: polyline.startCap,
+      visible: polyline.visible,
+      width: polyline.width,
+      zIndex: polyline.zIndex,
+      onTap: polyline.onTap,
+      gradient: gradient,
+      texture: texture,
+    );
+  }
+
+  void _toggleGradient(PolylineId polylineId) {
+    final Polyline polyline = polylines[polylineId]!;
+    setState(() {
+      polylines[polylineId] = _restyle(
+        polyline,
+        gradient: polyline.gradient == null ? gradient : null,
+        texture: polyline.texture,
+      );
+    });
+  }
+
+  Future<void> _toggleTexture(PolylineId polylineId) async {
+    final BitmapDescriptor texture = this.texture ??= await _createTexture();
+    final Polyline polyline = polylines[polylineId]!;
+    setState(() {
+      polylines[polylineId] = _restyle(
+        polyline,
+        gradient: polyline.gradient,
+        texture: polyline.texture == null ? texture : null,
+      );
+    });
+  }
+
+  /// Draws a white chevron on a transparent square.
+  Future<BitmapDescriptor> _createTexture() async {
+    const size = 32;
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+    canvas.drawPath(
+      Path()
+        ..moveTo(8, 22)
+        ..lineTo(16, 10)
+        ..lineTo(24, 22),
+      paint,
+    );
+    final ui.Image image = await recorder.endRecording().toImage(size, size);
+    final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    image.dispose();
+    return BytesMapBitmap(bytes!.buffer.asUint8List(), bitmapScaling: MapBitmapScaling.none);
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
@@ -265,6 +342,18 @@ class PlacePolylineBodyState extends State<PlacePolylineBody> {
                         TextButton(
                           onPressed: (selectedId == null) ? null : () => _changePattern(selectedId),
                           child: const Text('change pattern'),
+                        ),
+                        TextButton(
+                          onPressed: kIsWeb || (selectedId == null)
+                              ? null
+                              : () => _toggleGradient(selectedId),
+                          child: const Text('toggle gradient [Android/iOS only]'),
+                        ),
+                        TextButton(
+                          onPressed: kIsWeb || (selectedId == null)
+                              ? null
+                              : () => _toggleTexture(selectedId),
+                          child: const Text('toggle texture [Android/iOS only]'),
                         ),
                       ],
                     ),

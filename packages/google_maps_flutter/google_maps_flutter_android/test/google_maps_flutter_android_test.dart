@@ -728,6 +728,41 @@ void main() {
     expectPolyline(toAdd.first, object3);
   });
 
+  test('updatePolylines passes gradient and texture', () async {
+    const mapId = 1;
+    final (GoogleMapsFlutterAndroid maps, MockMapsApi api) = setUpMockMap(mapId: mapId);
+
+    final texture = BytesMapBitmap(
+      Uint8List.fromList(const <int>[0, 1, 2, 3]),
+      bitmapScaling: MapBitmapScaling.none,
+    );
+    const plain = Polyline(polylineId: PolylineId('plain'));
+    final styled = Polyline(
+      polylineId: const PolylineId('styled'),
+      gradient: const <Color>[Color(0xFF1B2A4A), Color(0xFFF5A524)],
+      texture: texture,
+    );
+    await maps.updatePolylines(
+      PolylineUpdates.from(const <Polyline>{}, <Polyline>{plain, styled}),
+      mapId: mapId,
+    );
+
+    final VerificationResult verification = verify(
+      api.updatePolylines(captureAny, captureAny, captureAny),
+    );
+    final toAdd = verification.captured[0] as List<PlatformPolyline>;
+    final PlatformPolyline actualPlain = toAdd.firstWhere((p) => p.polylineId == 'plain');
+    final PlatformPolyline actualStyled = toAdd.firstWhere((p) => p.polylineId == 'styled');
+
+    expect(actualPlain.gradient, isNull);
+    expect(actualPlain.texture, isNull);
+    expect(actualStyled.gradient?.startColor.argbValue, 0xFF1B2A4A);
+    expect(actualStyled.gradient?.endColor.argbValue, 0xFFF5A524);
+    expect(actualStyled.texture?.bitmap, isA<PlatformBitmapBytesMap>());
+    final bytes = actualStyled.texture!.bitmap as PlatformBitmapBytesMap;
+    expect(bytes.byteData, texture.byteData);
+  });
+
   test('updateTileOverlays passes expected arguments', () async {
     const mapId = 1;
     final (GoogleMapsFlutterAndroid maps, MockMapsApi api) = setUpMockMap(mapId: mapId);

@@ -36,6 +36,8 @@ class Polyline implements MapsObject<Polyline> {
     this.width = 10,
     this.zIndex = 0,
     this.onTap,
+    this.gradient,
+    this.texture,
   });
 
   /// Uniquely identifies a [Polyline].
@@ -50,6 +52,9 @@ class Polyline implements MapsObject<Polyline> {
   final bool consumeTapEvents;
 
   /// Line segment color in ARGB format, the same format used by Color. The default value is black (0xff000000).
+  ///
+  /// On platforms that support [gradient], this is not used while a
+  /// [gradient] is set.
   final Color color;
 
   /// Indicates whether the segments of the polyline should be drawn as geodesics, as opposed to straight lines
@@ -114,6 +119,34 @@ class Polyline implements MapsObject<Polyline> {
   /// Callbacks to receive tap events for polyline placed on this map.
   final VoidCallback? onTap;
 
+  /// The colors of a gradient drawn along the whole polyline, from its first
+  /// point to its last.
+  ///
+  /// Must contain exactly two colors: the color at the first point, then the
+  /// color at the last point. When set, the line is drawn with this gradient
+  /// instead of [color].
+  ///
+  /// On iOS, [patterns] are not applied while a gradient is set.
+  ///
+  /// Only supported on Android and on iOS with the
+  /// `google_maps_flutter_ios_sdk*` implementations; ignored elsewhere.
+  final List<Color>? gradient;
+
+  /// An image repeated along the polyline, stretched to the line's [width].
+  ///
+  /// The texture is drawn over the line's [color] or [gradient], so a
+  /// partially transparent image lets them show through.
+  ///
+  /// To create an image from assets, use [AssetMapBitmap],
+  /// [AssetMapBitmap.create] or [BitmapDescriptor.asset]. To create an image
+  /// from PNG data, use [BytesMapBitmap] or [BitmapDescriptor.bytes].
+  ///
+  /// On iOS, [patterns] are not applied while a texture is set.
+  ///
+  /// Only supported on Android and on iOS with the
+  /// `google_maps_flutter_ios_sdk*` implementations; ignored elsewhere.
+  final BitmapDescriptor? texture;
+
   /// Creates a new [Polyline] object whose values are the same as this instance,
   /// unless overwritten by the specified parameters.
   Polyline copyWith({
@@ -129,6 +162,8 @@ class Polyline implements MapsObject<Polyline> {
     int? widthParam,
     int? zIndexParam,
     VoidCallback? onTapParam,
+    List<Color>? gradientParam,
+    BitmapDescriptor? textureParam,
   }) {
     return Polyline(
       polylineId: polylineId,
@@ -144,6 +179,8 @@ class Polyline implements MapsObject<Polyline> {
       width: widthParam ?? width,
       onTap: onTapParam ?? onTap,
       zIndex: zIndexParam ?? zIndex,
+      gradient: gradientParam ?? gradient,
+      texture: textureParam ?? texture,
     );
   }
 
@@ -154,6 +191,7 @@ class Polyline implements MapsObject<Polyline> {
     return copyWith(
       patternsParam: List<PatternItem>.of(patterns),
       pointsParam: List<LatLng>.of(points),
+      gradientParam: gradient == null ? null : List<Color>.of(gradient!),
     );
   }
 
@@ -183,6 +221,9 @@ class Polyline implements MapsObject<Polyline> {
 
     json['pattern'] = _patternToJson();
 
+    addIfPresent('gradient', gradient?.map((Color color) => color.toARGB32()).toList());
+    addIfPresent('texture', texture?.toJson());
+
     return json;
   }
 
@@ -206,7 +247,9 @@ class Polyline implements MapsObject<Polyline> {
         endCap == other.endCap &&
         visible == other.visible &&
         width == other.width &&
-        zIndex == other.zIndex;
+        zIndex == other.zIndex &&
+        listEquals(gradient, other.gradient) &&
+        texture == other.texture;
   }
 
   @override

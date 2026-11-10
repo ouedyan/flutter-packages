@@ -1447,7 +1447,11 @@ data class PlatformPolyline(
     val endCap: PlatformCap,
     val visible: Boolean,
     val width: Long,
-    val zIndex: Long
+    val zIndex: Long,
+    /** The gradient drawn along the whole line instead of [color], if any. */
+    val gradient: PlatformPolylineGradient? = null,
+    /** The image repeated along the line, if any. */
+    val texture: PlatformBitmap? = null
 ) {
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): PlatformPolyline {
@@ -1463,6 +1467,8 @@ data class PlatformPolyline(
       val visible = pigeonVar_list[9] as Boolean
       val width = pigeonVar_list[10] as Long
       val zIndex = pigeonVar_list[11] as Long
+      val gradient = pigeonVar_list[12] as PlatformPolylineGradient?
+      val texture = pigeonVar_list[13] as PlatformBitmap?
       return PlatformPolyline(
           polylineId,
           consumesTapEvents,
@@ -1475,7 +1481,9 @@ data class PlatformPolyline(
           endCap,
           visible,
           width,
-          zIndex)
+          zIndex,
+          gradient,
+          texture)
     }
   }
 
@@ -1493,6 +1501,8 @@ data class PlatformPolyline(
         visible,
         width,
         zIndex,
+        gradient,
+        texture,
     )
   }
 
@@ -1515,7 +1525,9 @@ data class PlatformPolyline(
         MessagesPigeonUtils.deepEquals(this.endCap, other.endCap) &&
         MessagesPigeonUtils.deepEquals(this.visible, other.visible) &&
         MessagesPigeonUtils.deepEquals(this.width, other.width) &&
-        MessagesPigeonUtils.deepEquals(this.zIndex, other.zIndex)
+        MessagesPigeonUtils.deepEquals(this.zIndex, other.zIndex) &&
+        MessagesPigeonUtils.deepEquals(this.gradient, other.gradient) &&
+        MessagesPigeonUtils.deepEquals(this.texture, other.texture)
   }
 
   override fun hashCode(): Int {
@@ -1532,11 +1544,58 @@ data class PlatformPolyline(
     result = 31 * result + MessagesPigeonUtils.deepHash(this.visible)
     result = 31 * result + MessagesPigeonUtils.deepHash(this.width)
     result = 31 * result + MessagesPigeonUtils.deepHash(this.zIndex)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.gradient)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.texture)
     return result
   }
 
   override fun toString(): String {
-    return "PlatformPolyline(polylineId=$polylineId, consumesTapEvents=$consumesTapEvents, color=$color, geodesic=$geodesic, jointType=$jointType, patterns=$patterns, points=$points, startCap=$startCap, endCap=$endCap, visible=$visible, width=$width, zIndex=$zIndex)"
+    return "PlatformPolyline(polylineId=$polylineId, consumesTapEvents=$consumesTapEvents, color=$color, geodesic=$geodesic, jointType=$jointType, patterns=$patterns, points=$points, startCap=$startCap, endCap=$endCap, visible=$visible, width=$width, zIndex=$zIndex, gradient=$gradient, texture=$texture)"
+  }
+}
+
+/**
+ * Pigeon equivalent of a two-color polyline gradient, from the first point of the line to its last.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class PlatformPolylineGradient(val startColor: PlatformColor, val endColor: PlatformColor) {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): PlatformPolylineGradient {
+      val startColor = pigeonVar_list[0] as PlatformColor
+      val endColor = pigeonVar_list[1] as PlatformColor
+      return PlatformPolylineGradient(startColor, endColor)
+    }
+  }
+
+  fun toList(): List<Any?> {
+    return listOf(
+        startColor,
+        endColor,
+    )
+  }
+
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as PlatformPolylineGradient
+    return MessagesPigeonUtils.deepEquals(this.startColor, other.startColor) &&
+        MessagesPigeonUtils.deepEquals(this.endColor, other.endColor)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.startColor)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.endColor)
+    return result
+  }
+
+  override fun toString(): String {
+    return "PlatformPolylineGradient(startColor=$startColor, endColor=$endColor)"
   }
 }
 
@@ -3066,74 +3125,77 @@ private open class MessagesPigeonCodec : StandardMessageCodec() {
         return (readValue(buffer) as? List<Any?>)?.let { PlatformPolyline.fromList(it) }
       }
       158.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { PlatformCap.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { PlatformPolylineGradient.fromList(it) }
       }
       159.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { PlatformPatternItem.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { PlatformCap.fromList(it) }
       }
       160.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { PlatformTile.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { PlatformPatternItem.fromList(it) }
       }
       161.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { PlatformTileOverlay.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { PlatformTile.fromList(it) }
       }
       162.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { PlatformEdgeInsets.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { PlatformTileOverlay.fromList(it) }
       }
       163.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { PlatformLatLng.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { PlatformEdgeInsets.fromList(it) }
       }
       164.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { PlatformLatLngBounds.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { PlatformLatLng.fromList(it) }
       }
       165.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { PlatformCluster.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { PlatformLatLngBounds.fromList(it) }
       }
       166.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { PlatformGroundOverlay.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { PlatformCluster.fromList(it) }
       }
       167.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { PlatformCameraTargetBounds.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { PlatformGroundOverlay.fromList(it) }
       }
       168.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let { PlatformCameraTargetBounds.fromList(it) }
+      }
+      169.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           PlatformMapViewCreationParams.fromList(it)
         }
       }
-      169.toByte() -> {
+      170.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { PlatformMapConfiguration.fromList(it) }
       }
-      170.toByte() -> {
+      171.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { PlatformPoint.fromList(it) }
       }
-      171.toByte() -> {
+      172.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { PlatformTileLayer.fromList(it) }
       }
-      172.toByte() -> {
+      173.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { PlatformZoomRange.fromList(it) }
       }
-      173.toByte() -> {
+      174.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { PlatformBitmap.fromList(it) }
       }
-      174.toByte() -> {
+      175.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { PlatformBitmapDefaultMarker.fromList(it) }
       }
-      175.toByte() -> {
+      176.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { PlatformBitmapBytes.fromList(it) }
       }
-      176.toByte() -> {
+      177.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { PlatformBitmapAsset.fromList(it) }
       }
-      177.toByte() -> {
+      178.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { PlatformBitmapAssetImage.fromList(it) }
       }
-      178.toByte() -> {
+      179.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { PlatformBitmapAssetMap.fromList(it) }
       }
-      179.toByte() -> {
+      180.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { PlatformBitmapBytesMap.fromList(it) }
       }
-      180.toByte() -> {
+      181.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { PlatformBitmapPinConfig.fromList(it) }
       }
       else -> super.readValueOfType(type, buffer)
@@ -3258,96 +3320,100 @@ private open class MessagesPigeonCodec : StandardMessageCodec() {
         stream.write(157)
         writeValue(stream, value.toList())
       }
-      is PlatformCap -> {
+      is PlatformPolylineGradient -> {
         stream.write(158)
         writeValue(stream, value.toList())
       }
-      is PlatformPatternItem -> {
+      is PlatformCap -> {
         stream.write(159)
         writeValue(stream, value.toList())
       }
-      is PlatformTile -> {
+      is PlatformPatternItem -> {
         stream.write(160)
         writeValue(stream, value.toList())
       }
-      is PlatformTileOverlay -> {
+      is PlatformTile -> {
         stream.write(161)
         writeValue(stream, value.toList())
       }
-      is PlatformEdgeInsets -> {
+      is PlatformTileOverlay -> {
         stream.write(162)
         writeValue(stream, value.toList())
       }
-      is PlatformLatLng -> {
+      is PlatformEdgeInsets -> {
         stream.write(163)
         writeValue(stream, value.toList())
       }
-      is PlatformLatLngBounds -> {
+      is PlatformLatLng -> {
         stream.write(164)
         writeValue(stream, value.toList())
       }
-      is PlatformCluster -> {
+      is PlatformLatLngBounds -> {
         stream.write(165)
         writeValue(stream, value.toList())
       }
-      is PlatformGroundOverlay -> {
+      is PlatformCluster -> {
         stream.write(166)
         writeValue(stream, value.toList())
       }
-      is PlatformCameraTargetBounds -> {
+      is PlatformGroundOverlay -> {
         stream.write(167)
         writeValue(stream, value.toList())
       }
-      is PlatformMapViewCreationParams -> {
+      is PlatformCameraTargetBounds -> {
         stream.write(168)
         writeValue(stream, value.toList())
       }
-      is PlatformMapConfiguration -> {
+      is PlatformMapViewCreationParams -> {
         stream.write(169)
         writeValue(stream, value.toList())
       }
-      is PlatformPoint -> {
+      is PlatformMapConfiguration -> {
         stream.write(170)
         writeValue(stream, value.toList())
       }
-      is PlatformTileLayer -> {
+      is PlatformPoint -> {
         stream.write(171)
         writeValue(stream, value.toList())
       }
-      is PlatformZoomRange -> {
+      is PlatformTileLayer -> {
         stream.write(172)
         writeValue(stream, value.toList())
       }
-      is PlatformBitmap -> {
+      is PlatformZoomRange -> {
         stream.write(173)
         writeValue(stream, value.toList())
       }
-      is PlatformBitmapDefaultMarker -> {
+      is PlatformBitmap -> {
         stream.write(174)
         writeValue(stream, value.toList())
       }
-      is PlatformBitmapBytes -> {
+      is PlatformBitmapDefaultMarker -> {
         stream.write(175)
         writeValue(stream, value.toList())
       }
-      is PlatformBitmapAsset -> {
+      is PlatformBitmapBytes -> {
         stream.write(176)
         writeValue(stream, value.toList())
       }
-      is PlatformBitmapAssetImage -> {
+      is PlatformBitmapAsset -> {
         stream.write(177)
         writeValue(stream, value.toList())
       }
-      is PlatformBitmapAssetMap -> {
+      is PlatformBitmapAssetImage -> {
         stream.write(178)
         writeValue(stream, value.toList())
       }
-      is PlatformBitmapBytesMap -> {
+      is PlatformBitmapAssetMap -> {
         stream.write(179)
         writeValue(stream, value.toList())
       }
-      is PlatformBitmapPinConfig -> {
+      is PlatformBitmapBytesMap -> {
         stream.write(180)
+        writeValue(stream, value.toList())
+      }
+      is PlatformBitmapPinConfig -> {
+        stream.write(181)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
