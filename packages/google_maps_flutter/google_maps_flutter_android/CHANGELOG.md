@@ -1,3 +1,7 @@
+## 2.22.1
+
+* Forwards the activity's pause callback to the map view.
+
 ## 2.22.0
 
 * Adds support for `Polyline.gradient` and `Polyline.texture`.

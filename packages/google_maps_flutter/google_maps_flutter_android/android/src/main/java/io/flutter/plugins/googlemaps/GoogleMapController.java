@@ -508,7 +508,7 @@ class GoogleMapController
     if (disposed) {
       return;
     }
-    mapView.onResume();
+    mapView.onPause();
   }
 
   @Override
